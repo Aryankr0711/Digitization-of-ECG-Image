@@ -1,0 +1,37 @@
+# Datasets
+train/
+Pre_Processed_train/
+
+# Models and Weights
+*.pth
+*.h5
+
+# Data Files
+*.npz
+*.csv
+!README.md
+!assets/*.csv
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation (Optional: Exclude if only code is desired)
+*.docx
