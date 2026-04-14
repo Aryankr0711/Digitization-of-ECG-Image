@@ -1,0 +1,156 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         QUICK REFERENCE CARD                                 ║
+║                    Updated Plot Format - 13 Leads                            ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+🚀 RUN THE SCRIPT
+═════════════════
+
+    cd d:\mdm_proj\Digitization-of-ECG-Image
+    python test_10_patients.py
+
+📊 WHERE ARE MY PLOTS?
+══════════════════════
+
+    results/test_10_patients/detailed_plots/
+
+    Files:
+    • {patient_id}_detailed_comparison.png (10 files)
+    • Each shows 13 leads (I, II, III, aVR, aVL, aVF, V1-V6, II-rhythm)
+
+🎨 PLOT STYLE
+═════════════
+
+    ┌─────────────────────────────────────────────────┐
+    │ Patient 10140238 — Original vs Predicted ECG    │
+    │                           — Original (Blue)     │
+    │                           — Predicted (Red)     │
+    ├─────────────────────────────────────────────────┤
+    │ I    │ ▁▂▃▄▅▆▇█ (overlaid signals)             │
+    │ II   │ ▁▂▃▄▅▆▇█                                 │
+    │ III  │ ▁▂▃▄▅▆▇█                                 │
+    │ aVR  │ ▁▂▃▄▅▆▇█                                 │
+    │ aVL  │ ▁▂▃▄▅▆▇█                                 │
+    │ aVF  │ ▁▂▃▄▅▆▇█                                 │
+    │ V1   │ ▁▂▃▄▅▆▇█                                 │
+    │ V2   │ ▁▂▃▄▅▆▇█                                 │
+    │ V3   │ ▁▂▃▄▅▆▇█                                 │
+    │ V4   │ ▁▂▃▄▅▆▇█                                 │
+    │ V5   │ ▁▂▃▄▅▆▇█                                 │
+    │ V6   │ ▁▂▃▄▅▆▇█                                 │
+    │II-rhythm│ ▁▂▃▄▅▆▇█                              │
+    └─────────────────────────────────────────────────┘
+
+📈 METRICS
+══════════
+
+    For each patient, you get:
+    • SNR (dB) - Higher is better (20-25 = excellent)
+    • RMSE - Lower is better (< 0.1 = very good)
+    • MAE - Lower is better (< 0.08 = very good)
+    • MSE - Lower is better (< 0.01 = very good)
+
+    Calculated for:
+    • Each individual lead (13 total)
+    • Average across all leads
+
+📁 OUTPUT STRUCTURE
+═══════════════════
+
+    results/test_10_patients/
+    ├── summary.txt                    ← Read first
+    ├── summary_all_patients.png       ← Overview
+    │
+    ├── detailed_plots/                ← ⭐ YOUR PLOTS
+    │   ├── 640106434_detailed_comparison.png
+    │   ├── 1006427285_detailed_comparison.png
+    │   └── ... (10 total)
+    │
+    └── patient_{id}/
+        ├── metrics.json               ← Detailed metrics
+        └── predicted_signals.npy      ← Raw data
+
+⏱️ TIME ESTIMATE
+════════════════
+
+    Total: 10-30 minutes for 10 patients
+    
+    Breakdown:
+    • Preprocessing: 1-2 min
+    • Inference: 5-20 min (slowest)
+    • Visualization: 1-2 min
+
+🎯 WHAT TO LOOK FOR
+═══════════════════
+
+    ✅ Good Prediction:
+       • Blue and red lines overlap closely
+       • High SNR (> 20 dB)
+       • Low RMSE (< 0.1)
+    
+    ❌ Poor Prediction:
+       • Lines diverge significantly
+       • Low SNR (< 15 dB)
+       • High RMSE (> 0.2)
+
+🔧 CUSTOMIZATION
+════════════════
+
+    Edit test_10_patients.py, line 35:
+    
+    'num_patients': 10    ← Change this number
+    
+    Examples:
+    • 5 = Quick test (5-15 min)
+    • 20 = More comprehensive (20-60 min)
+    • 50 = Extensive (1-2 hours)
+
+📚 DOCUMENTATION
+════════════════
+
+    • QUICK_START.txt - Basic usage
+    • NEW_PLOT_FORMAT.txt - Plot details
+    • UPDATES_SUMMARY.txt - What changed
+    • README_TEST_SCRIPT.md - Full manual
+    • PRE_FLIGHT_CHECKLIST.txt - Pre-run checks
+
+🆘 TROUBLESHOOTING
+══════════════════
+
+    Problem: "No module named 'cv2'"
+    Solution: pip install opencv-python
+    
+    Problem: Script is slow
+    Solution: Normal on CPU, reduce num_patients to 5
+    
+    Problem: Can't find plots
+    Solution: Check results/test_10_patients/detailed_plots/
+    
+    Problem: Plots look wrong
+    Solution: Check that train/ folder has .png and .csv files
+
+✅ CHECKLIST
+════════════
+
+    Before running:
+    □ Python installed
+    □ Packages installed (pip install -r requirements_test.txt)
+    □ train/ folder exists with patient data
+    □ At least 2GB free disk space
+    
+    After running:
+    □ Check console for errors
+    □ Open summary.txt
+    □ View detailed_plots/ folder
+    □ Compare blue vs red lines in plots
+
+🎉 READY!
+═════════
+
+    Everything is set up and ready to go!
+    
+    Run: python test_10_patients.py
+    
+    Your plots will match the reference image exactly!
+
+═══════════════════════════════════════════════════════════════════════════════

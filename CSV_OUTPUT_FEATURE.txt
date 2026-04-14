@@ -1,0 +1,234 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    ✅ NEW FEATURE: CSV OUTPUT FILES                          ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+🎉 The script now saves predicted signals as CSV files!
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         WHAT'S NEW                                           ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+For each patient, you now get:
+
+results/test_10_patients/patient_{id}/
+├── predicted_signals.csv          ← ⭐ NEW! Predicted signals
+├── original_signals.csv           ← ⭐ NEW! Copy of original
+├── predicted_signals.npy          ← Numpy format (existing)
+├── metrics.json                   ← Metrics (existing)
+└── detailed_plots/
+    └── {id}_detailed_comparison.png
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         CSV FILE FORMAT                                      ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Both CSV files have the SAME format:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ I      │ II     │ III    │ aVR    │ aVL    │ aVF    │ V1     │ V2     │ ... │
+├────────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┼─────┤
+│ 0.123  │ 0.456  │ 0.789  │ -0.234 │ 0.567  │ 0.890  │ 0.345  │ 0.678  │ ... │
+│ 0.124  │ 0.457  │ 0.790  │ -0.235 │ 0.568  │ 0.891  │ 0.346  │ 0.679  │ ... │
+│ 0.125  │ 0.458  │ 0.791  │ -0.236 │ 0.569  │ 0.892  │ 0.347  │ 0.680  │ ... │
+│ ...    │ ...    │ ...    │ ...    │ ...    │ ...    │ ...    │ ...    │ ... │
+└────────┴────────┴────────┴────────┴────────┴────────┴────────┴────────┴─────┘
+
+Columns (13 total):
+• I, II, III       - Limb leads
+• aVR, aVL, aVF    - Augmented leads
+• V1, V2, V3, V4, V5, V6 - Precordial leads
+• II-rhythm        - Long rhythm strip
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         FILE COMPARISON                                      ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+original_signals.csv:
+• Ground truth from train/{id}/{id}.csv
+• What the signal actually is
+• Reference for comparison
+
+predicted_signals.csv:
+• Model's prediction from ECG image
+• What the model extracted
+• Compare with original to check accuracy
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         HOW TO USE IN COLAB                                  ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Now you can easily upload to Google Colab:
+
+1. Upload 2 CSV files:
+   • original_signals.csv
+   • predicted_signals.csv
+
+2. Read in Colab:
+   import pandas as pd
+   original = pd.read_csv('original_signals.csv')
+   predicted = pd.read_csv('predicted_signals.csv')
+
+3. Plot comparison:
+   # Plot any lead
+   plt.plot(original['II'], label='Original', color='blue')
+   plt.plot(predicted['II'], label='Predicted', color='red')
+   plt.legend()
+   plt.show()
+
+4. Calculate metrics:
+   from sklearn.metrics import mean_squared_error
+   rmse = mean_squared_error(original['II'], predicted['II'], squared=False)
+   print(f"RMSE: {rmse}")
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         BENEFITS                                             ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+✅ Easy to upload to Colab (just CSV files)
+✅ Standard format (readable by any tool)
+✅ Easy to compare (same column names)
+✅ Can use pandas, Excel, or any CSV reader
+✅ No need for numpy in Colab
+✅ Human-readable format
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         FILE SIZES                                           ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Typical sizes per patient:
+
+original_signals.csv:     ~50-100 KB
+predicted_signals.csv:    ~50-100 KB
+predicted_signals.npy:    ~40-80 KB (binary)
+metrics.json:             ~2-5 KB
+detailed_comparison.png:  ~3-5 MB
+
+Total per patient: ~3-5 MB
+
+For 10 patients: ~30-50 MB
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         EXAMPLE USAGE                                        ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Python/Colab:
+─────────────
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Read CSV files
+original = pd.read_csv('original_signals.csv')
+predicted = pd.read_csv('predicted_signals.csv')
+
+# Compare Lead II
+plt.figure(figsize=(15, 4))
+plt.plot(original['II'][:1000], 'b-', label='Original', linewidth=1)
+plt.plot(predicted['II'][:1000], 'r--', label='Predicted', linewidth=1)
+plt.xlabel('Sample')
+plt.ylabel('Amplitude (mV)')
+plt.title('Lead II Comparison')
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.show()
+
+# Calculate metrics
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+import numpy as np
+
+rmse = mean_squared_error(original['II'], predicted['II'], squared=False)
+mae = mean_absolute_error(original['II'], predicted['II'])
+snr = 10 * np.log10(np.mean(original['II']**2) / np.mean((original['II'] - predicted['II'])**2))
+
+print(f"RMSE: {rmse:.4f}")
+print(f"MAE: {mae:.4f}")
+print(f"SNR: {snr:.2f} dB")
+
+
+Excel:
+──────
+1. Open both CSV files in Excel
+2. Create a chart with both columns
+3. Compare visually
+
+
+R:
+──
+original <- read.csv('original_signals.csv')
+predicted <- read.csv('predicted_signals.csv')
+plot(original$II, type='l', col='blue')
+lines(predicted$II, col='red')
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         RUNNING THE UPDATED SCRIPT                           ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+The script has been updated! Run it again:
+
+    python test_10_patients.py
+
+New output:
+───────────
+STEP 3: EVALUATION AND VISUALIZATION
+
+  Patient 1815848373:
+    Average SNR:  3.81 dB
+    Average RMSE: 0.0500
+    Average MAE:  0.0399
+    Average MSE:  0.002499
+  ✓ Saved predicted CSV: results/.../predicted_signals.csv    ← NEW!
+  ✓ Copied original CSV: results/.../original_signals.csv     ← NEW!
+  ✓ Saved detailed plot: results/.../detailed_comparison.png
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         WHAT YOU CAN DO NOW                                  ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+1. ✅ Upload CSV files to Google Colab
+   • Easy to work with
+   • Standard format
+   • No special libraries needed
+
+2. ✅ Open in Excel/Google Sheets
+   • Visual comparison
+   • Create custom charts
+   • Share with others
+
+3. ✅ Use in any programming language
+   • Python, R, MATLAB, Julia
+   • Standard CSV format
+   • Universal compatibility
+
+4. ✅ Compare side-by-side
+   • Same column names
+   • Same number of rows
+   • Easy to align and compare
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         NEXT STEPS                                           ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+1. Run the updated script:
+   python test_10_patients.py
+
+2. Check the results folder:
+   results/test_10_patients/patient_{id}/
+   ├── original_signals.csv      ← NEW!
+   └── predicted_signals.csv     ← NEW!
+
+3. Upload to Google Colab:
+   • Just these 2 CSV files
+   • Use the Colab notebook I'll create
+   • See beautiful plots
+
+4. Compare and analyze:
+   • Calculate your own metrics
+   • Create custom visualizations
+   • Share results easily
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Ready to run? Execute: python test_10_patients.py
+
+Then you'll have CSV files ready for Colab! 🎉
+
+═══════════════════════════════════════════════════════════════════════════════

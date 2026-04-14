@@ -1,0 +1,207 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    ECG DIGITIZATION - QUICK START GUIDE                      ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📋 WHAT YOU HAVE:
+  ✅ test_10_patients.py          - Main test script
+  ✅ README_TEST_SCRIPT.md         - Detailed documentation
+  ✅ requirements_test.txt         - Required packages
+  ✅ 977 patient folders in train/ - Your raw data
+
+📊 WHAT YOU'LL GET:
+  ✅ Multiple metrics: SNR, RMSE, MSE, MAE
+  ✅ Comparison plots: Original vs Predicted signals
+  ✅ Summary statistics for all patients
+  ✅ Individual patient analysis
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                              STEP-BY-STEP GUIDE                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+STEP 1: Install Required Packages
+──────────────────────────────────
+Open Command Prompt/Terminal and run:
+
+    cd d:\mdm_proj\Digitization-of-ECG-Image
+    pip install -r requirements_test.txt
+
+Expected time: 2-5 minutes
+
+
+STEP 2: Run the Test Script
+────────────────────────────
+    python test_10_patients.py
+
+Expected time: 10-30 minutes (depends on your CPU/GPU)
+
+What happens:
+  [1/3] Preprocessing 10 patients    (~1-2 min)
+  [2/3] Running inference            (~5-20 min)
+  [3/3] Evaluation & visualization   (~1-2 min)
+
+
+STEP 3: Check Results
+─────────────────────
+Navigate to: results/test_10_patients/
+
+Files to check:
+  📄 summary.txt                    - Read this first!
+  📊 summary_all_patients.png       - Visual overview
+  📁 patient_*/                     - Individual results
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                            UNDERSTANDING RESULTS                             ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+METRICS EXPLAINED:
+──────────────────
+
+📈 SNR (Signal-to-Noise Ratio) - in dB
+   • Higher is better
+   • 20-25 dB = Excellent (competition level)
+   • 15-20 dB = Good
+   • < 15 dB  = Needs improvement
+
+📉 RMSE (Root Mean Squared Error)
+   • Lower is better
+   • < 0.1    = Very good
+   • 0.1-0.2  = Good
+   • > 0.2    = Needs improvement
+
+📉 MAE (Mean Absolute Error)
+   • Lower is better
+   • < 0.08   = Very good
+   • 0.08-0.15 = Good
+   • > 0.15   = Needs improvement
+
+📉 MSE (Mean Squared Error)
+   • Lower is better
+   • < 0.01   = Very good
+   • 0.01-0.04 = Good
+   • > 0.04   = Needs improvement
+
+
+PLOT INTERPRETATION:
+────────────────────
+
+Each patient has a comparison plot with 4 subplots:
+
+  🔵 Blue solid line   = Original ground truth (from CSV)
+  🔴 Red dashed line   = Predicted by model (from image)
+
+The closer the lines match, the better the digitization!
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                              CUSTOMIZATION                                   ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+To test MORE or FEWER patients:
+────────────────────────────────
+Edit test_10_patients.py, line 35:
+
+    'num_patients': 10,    # Change this number
+
+Examples:
+    'num_patients': 5,     # Quick test
+    'num_patients': 50,    # More comprehensive
+    'num_patients': 977,   # All patients (takes hours!)
+
+
+To test SPECIFIC patients:
+──────────────────────────
+Edit test_10_patients.py, around line 450:
+
+Replace:
+    selected_patients = np.random.choice(all_patients, ...)
+
+With:
+    selected_patients = ['640106434', '1006427285', ...]  # Your patient IDs
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                              TROUBLESHOOTING                                 ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+❌ Error: "No module named 'cv2'"
+   Solution: pip install opencv-python
+
+❌ Error: "CUDA out of memory"
+   Solution: Script will auto-switch to CPU (slower but works)
+
+❌ Error: "No patients found"
+   Solution: Check that train/ folder exists with patient subdirectories
+
+❌ Script is too slow
+   Solution: Reduce 'num_patients' to 5 or use GPU if available
+
+❌ Want better results
+   Solution: This is a simplified test. For production-level results,
+            use the full 3-stage pipeline with all 13 ensemble models
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                              EXAMPLE OUTPUT                                  ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+After running, you'll see:
+
+ECG DIGITIZATION TEST - 10 PATIENTS
+================================================================================
+
+Total patients available: 977
+Selected 10 patients for testing:
+  1. 640106434
+  2. 1006427285
+  ...
+
+STEP 1: PREPROCESSING 10 PATIENTS
+Preprocessing: 100%|██████████| 10/10 [00:15<00:00]
+✓ Preprocessing complete: 10/10 successful
+
+STEP 2: RUNNING INFERENCE ON 10 PATIENTS
+Inference: 100%|██████████| 10/10 [05:23<00:00]
+✓ Inference complete: 10/10 successful
+
+STEP 3: EVALUATION AND VISUALIZATION
+Evaluating: 100%|██████████| 10/10 [00:42<00:00]
+
+  Patient 640106434:
+    Average SNR:  23.45 dB  ← Excellent!
+    Average RMSE: 0.0523    ← Very good!
+    Average MAE:  0.0412    ← Very good!
+    Average MSE:  0.002734  ← Very good!
+
+✓ Evaluation complete!
+
+TEST COMPLETE!
+================================================================================
+✓ Processed: 10 patients
+✓ Results saved to: results/test_10_patients
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                              NEXT STEPS                                      ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+After reviewing results:
+
+1. ✅ Check summary.txt for overall statistics
+2. ✅ View summary_all_patients.png for quick comparison
+3. ✅ Examine individual patient plots
+4. ✅ Identify best/worst performing patients
+5. ✅ If satisfied, test on more patients
+6. ✅ For production use, integrate full 3-stage pipeline
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                              SUPPORT                                         ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+For detailed documentation, see: README_TEST_SCRIPT.md
+
+Questions about:
+  • Metrics interpretation → See "UNDERSTANDING RESULTS" section above
+  • Customization → See "CUSTOMIZATION" section above
+  • Errors → See "TROUBLESHOOTING" section above
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Ready to start? Run:  python test_10_patients.py
+
+═══════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,237 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    UPDATED: NEW PLOT FORMAT                                  ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+🎨 NEW VISUALIZATION STYLE
+
+The plots now match your reference image exactly!
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         WHAT'S CHANGED                                       ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+✅ NEW: Detailed 13-lead plots
+   • Shows all 12 individual ECG leads
+   • Plus II-rhythm strip
+   • Each lead in its own subplot
+
+✅ NEW: Separate folder for detailed plots
+   • Location: results/test_10_patients/detailed_plots/
+   • Keeps detailed plots organized
+
+✅ NEW: Matching reference style
+   • Blue line = Original (ground truth)
+   • Red/Orange line = Predicted (model output)
+   • First 10000 samples shown
+   • Clean, professional layout
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         OUTPUT STRUCTURE                                     ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+results/test_10_patients/
+├── summary.txt                          # Overall statistics
+├── summary_all_patients.png             # Bar chart summary
+│
+├── detailed_plots/                      # ⭐ NEW FOLDER
+│   ├── 640106434_detailed_comparison.png
+│   ├── 1006427285_detailed_comparison.png
+│   └── ... (10 detailed plots)
+│
+└── patient_640106434/
+    ├── metrics.json                     # All metrics
+    └── predicted_signals.npy            # Predictions
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         DETAILED PLOT FORMAT                                 ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Each detailed plot shows:
+
+┌─────────────────────────────────────────────────────────────┐
+│ Patient 10140238 — Original vs Predicted ECG                │
+│                                      — Original             │
+│                                      — Predicted            │
+├─────────────────────────────────────────────────────────────┤
+│ I    │ ▁▂▃▄▅▆▇█ (Blue and Red/Orange overlaid)            │
+├─────────────────────────────────────────────────────────────┤
+│ II   │ ▁▂▃▄▅▆▇█                                            │
+├─────────────────────────────────────────────────────────────┤
+│ III  │ ▁▂▃▄▅▆▇█                                            │
+├─────────────────────────────────────────────────────────────┤
+│ aVR  │ ▁▂▃▄▅▆▇█                                            │
+├─────────────────────────────────────────────────────────────┤
+│ aVL  │ ▁▂▃▄▅▆▇█                                            │
+├─────────────────────────────────────────────────────────────┤
+│ aVF  │ ▁▂▃▄▅▆▇█                                            │
+├─────────────────────────────────────────────────────────────┤
+│ V1   │ ▁▂▃▄▅▆▇█                                            │
+├─────────────────────────────────────────────────────────────┤
+│ V2   │ ▁▂▃▄▅▆▇█                                            │
+├─────────────────────────────────────────────────────────────┤
+│ V3   │ ▁▂▃▄▅▆▇█                                            │
+├─────────────────────────────────────────────────────────────┤
+│ V4   │ ▁▂▃▄▅▆▇█                                            │
+├─────────────────────────────────────────────────────────────┤
+│ V5   │ ▁▂▃▄▅▆▇█                                            │
+├─────────────────────────────────────────────────────────────┤
+│ V6   │ ▁▂▃▄▅▆▇█                                            │
+├─────────────────────────────────────────────────────────────┤
+│II-rhythm│ ▁▂▃▄▅▆▇█ (Long rhythm strip)                    │
+└─────────────────────────────────────────────────────────────┘
+
+Features:
+• 13 subplots (12 leads + rhythm)
+• X-axis: 0 to 10000 samples
+• Y-axis: Lead name on left
+• Blue line: Original signal
+• Red/Orange line: Predicted signal
+• Grid lines for easy reading
+• Professional medical chart style
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         HOW TO USE                                           ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+STEP 1: Run the script
+──────────────────────
+python test_10_patients.py
+
+
+STEP 2: Check detailed plots
+─────────────────────────────
+Navigate to: results/test_10_patients/detailed_plots/
+
+You'll find:
+• {patient_id}_detailed_comparison.png for each patient
+• High resolution (150 DPI)
+• Large format (20" x 26")
+• Perfect for detailed analysis
+
+
+STEP 3: Interpret the plots
+────────────────────────────
+Look for:
+✅ Blue and red lines overlap closely = Good prediction
+✅ Consistent patterns across all leads = Reliable model
+❌ Lines diverge significantly = Poor prediction
+❌ Noisy or erratic patterns = Data quality issues
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         METRICS CALCULATION                                  ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Metrics are calculated for EACH of the 13 leads:
+
+Individual Lead Metrics:
+• SNR, RMSE, MAE, MSE for each lead
+• Saved in metrics.json
+
+Average Metrics:
+• Average across all 13 leads
+• Shown in summary.txt
+• Used for summary_all_patients.png
+
+This gives you both:
+1. Overall performance (average)
+2. Per-lead performance (detailed)
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         FILE SIZES                                           ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Each detailed plot:
+• Size: ~2-4 MB per image
+• Resolution: 150 DPI
+• Dimensions: 20" x 26" (3000 x 3900 pixels)
+• Format: PNG
+
+For 10 patients:
+• detailed_plots/ folder: ~20-40 MB
+• High quality for presentations/papers
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         COMPARISON: OLD vs NEW                               ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+OLD FORMAT (4 subplots):
+├── Series 0 (I+aVR+V1+V4) - Combined
+├── Series 1 (II+aVL+V2+V5) - Combined
+├── Series 2 (III+aVF+V3+V6) - Combined
+└── Series 3 (II-rhythm)
+
+NEW FORMAT (13 subplots):
+├── I (individual)
+├── II (individual)
+├── III (individual)
+├── aVR (individual)
+├── aVL (individual)
+├── aVF (individual)
+├── V1 (individual)
+├── V2 (individual)
+├── V3 (individual)
+├── V4 (individual)
+├── V5 (individual)
+├── V6 (individual)
+└── II-rhythm (individual)
+
+Benefits of NEW format:
+✅ See each lead separately
+✅ Identify which specific leads have issues
+✅ Matches clinical ECG format
+✅ Easier to compare with reference
+✅ Professional medical presentation
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         EXAMPLE OUTPUT                                       ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+After running, you'll see:
+
+STEP 3: EVALUATION AND VISUALIZATION
+Evaluating: 100%|██████████| 10/10
+
+  Patient 640106434:
+    Average SNR:  23.45 dB  (across all 13 leads)
+    Average RMSE: 0.0523
+    Average MAE:  0.0412
+    Average MSE:  0.002734
+
+  ✓ Saved detailed plot: results/.../detailed_plots/640106434_detailed_comparison.png
+
+✓ Evaluation complete!
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         TIPS FOR ANALYSIS                                    ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+1. Check Lead II and II-rhythm first
+   • Most important for rhythm analysis
+   • Should have highest SNR
+
+2. Look for consistent patterns
+   • If all leads look good = excellent model
+   • If only some leads good = model bias
+
+3. Zoom in on problem areas
+   • Open PNG in image viewer
+   • Zoom to 200-400% to see details
+   • Check specific waveforms (P, QRS, T)
+
+4. Compare across patients
+   • Some patients easier than others
+   • Identify common failure patterns
+   • Improve model based on findings
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         READY TO RUN?                                        ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+The script is updated and ready!
+
+Run: python test_10_patients.py
+
+Your detailed plots will be in:
+results/test_10_patients/detailed_plots/
+
+═══════════════════════════════════════════════════════════════════════════════
