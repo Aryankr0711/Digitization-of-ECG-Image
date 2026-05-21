@@ -2,6 +2,10 @@
 train/
 Pre_Processed_train/
 
+# Large external/model artifact folders
+physionet-final-submission-models/
+hengck23-demo-submit-physionet/weight/
+
 # Models and Weights
 *.pth
 *.h5
@@ -20,6 +24,14 @@ __pycache__/
 env/
 venv/
 ENV/
+
+# Web/build/runtime outputs
+node_modules/
+.next/
+web/frontend/node_modules/
+web/frontend/.next/
+web/backend/outputs/
+/results/
 
 # Jupyter Notebook
 .ipynb_checkpoints

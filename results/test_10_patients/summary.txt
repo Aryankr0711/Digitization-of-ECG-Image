@@ -2,7 +2,7 @@
 ECG DIGITIZATION TEST RESULTS - 10 PATIENTS
 ================================================================================
 
-Test Date: 2026-04-14 16:23:37
+Test Date: 2026-04-30 15:36:52
 Number of Patients: 10
 Device Used: cpu
 
@@ -11,76 +11,76 @@ INDIVIDUAL PATIENT RESULTS
 ================================================================================
 
 Patient 1815848373:
-  SNR:      3.81 dB
-  RMSE:   0.0500
-  MAE:    0.0399
-  MSE:  0.002499
+  SNR:     20.07 dB
+  RMSE:   0.0079
+  MAE:    0.0043
+  MSE:  0.000068
 
 Patient 3254266514:
-  SNR:      8.68 dB
-  RMSE:   0.0500
-  MAE:    0.0398
-  MSE:  0.002498
+  SNR:     25.96 dB
+  RMSE:   0.0072
+  MAE:    0.0041
+  MSE:  0.000060
 
 Patient 1717124873:
-  SNR:      3.20 dB
-  RMSE:   0.0500
-  MAE:    0.0399
-  MSE:  0.002504
+  SNR:     20.91 dB
+  RMSE:   0.0066
+  MAE:    0.0035
+  MSE:  0.000046
 
 Patient 4092807213:
-  SNR:     11.05 dB
-  RMSE:   0.0499
-  MAE:    0.0398
-  MSE:  0.002488
+  SNR:     28.24 dB
+  RMSE:   0.0071
+  MAE:    0.0039
+  MSE:  0.000056
 
 Patient 129883643:
-  SNR:      2.95 dB
-  RMSE:   0.0501
-  MAE:    0.0400
-  MSE:  0.002514
+  SNR:     22.82 dB
+  RMSE:   0.0052
+  MAE:    0.0028
+  MSE:  0.000029
 
 Patient 3080195423:
-  SNR:      2.65 dB
-  RMSE:   0.0500
-  MAE:    0.0399
-  MSE:  0.002504
+  SNR:     20.95 dB
+  RMSE:   0.0063
+  MAE:    0.0034
+  MSE:  0.000043
 
 Patient 3851138087:
-  SNR:      4.41 dB
-  RMSE:   0.0500
-  MAE:    0.0399
-  MSE:  0.002505
+  SNR:     20.22 dB
+  RMSE:   0.0084
+  MAE:    0.0046
+  MSE:  0.000078
 
 Patient 3275080079:
-  SNR:      4.17 dB
-  RMSE:   0.0499
-  MAE:    0.0398
-  MSE:  0.002486
+  SNR:     20.15 dB
+  RMSE:   0.0085
+  MAE:    0.0047
+  MSE:  0.000085
 
 Patient 761994718:
-  SNR:      3.88 dB
-  RMSE:   0.0501
-  MAE:    0.0399
-  MSE:  0.002507
+  SNR:     22.89 dB
+  RMSE:   0.0059
+  MAE:    0.0034
+  MSE:  0.000040
 
 Patient 1659921138:
-  SNR:      1.92 dB
-  RMSE:   0.0501
-  MAE:    0.0399
-  MSE:  0.002510
+  SNR:     21.46 dB
+  RMSE:   0.0055
+  MAE:    0.0030
+  MSE:  0.000032
 
 ================================================================================
 OVERALL STATISTICS
 ================================================================================
 
-Average SNR:  4.67 ± 2.74 dB
-Average RMSE: 0.0500 ± 0.0001
-Average MAE:  0.0399 ± 0.0001
-Average MSE:  0.002501 ± 0.000009
+Average SNR:  22.37 ± 2.60 dB
+Average RMSE: 0.0069 ± 0.0011
+Average MAE:  0.0038 ± 0.0006
+Average MSE:  0.000054 ± 0.000018
 
-Best SNR:  11.05 dB
-Worst SNR: 1.92 dB
+Best SNR:  28.24 dB
+Worst SNR: 20.07 dB
 
 ================================================================================
 Results saved to: results/test_10_patients

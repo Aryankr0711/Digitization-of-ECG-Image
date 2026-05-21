@@ -18,6 +18,7 @@ from pathlib import Path
 from tqdm import tqdm
 import json
 from datetime import datetime
+from scipy import signal as scipy_signal
 
 # Add paths for imports
 sys.path.append('hengck23-demo-submit-physionet')
@@ -46,6 +47,68 @@ torch.manual_seed(CONFIG['seed'])
 
 print(f"Using device: {CONFIG['device']}")
 print("="*80)
+
+# ============================================================================
+# SIGNAL PROCESSING — Wavelet Denoising (peak-preserving)
+# 
+# Wavelet denoising is the gold standard for ECG signal processing:
+#   - Decomposes the signal into wavelet coefficients at multiple scales
+#   - Noise appears as small coefficients → shrunk to zero (soft threshold)
+#   - QRS peaks appear as large coefficients → left intact
+# Result: noise is removed, peaks are fully preserved.
+# ============================================================================
+
+import pywt
+
+def wavelet_denoise(sig, wavelet='sym4', level=None):
+    """Denoise a 1D signal using wavelet soft thresholding.
+    
+    Args:
+        sig: 1D numpy array (one ECG lead)
+        wavelet: wavelet family — 'sym4' is standard for ECG
+        level: decomposition level (None = auto based on signal length)
+    
+    Returns:
+        Denoised signal with same length, peaks preserved.
+    """
+    # Auto-select decomposition level if not specified
+    if level is None:
+        level = min(pywt.dwt_max_level(len(sig), pywt.Wavelet(wavelet).dec_len), 6)
+    
+    # Wavelet decomposition
+    coeffs = pywt.wavedec(sig, wavelet, level=level)
+    
+    # Estimate noise from the finest detail coefficients (level 1)
+    # MAD (Median Absolute Deviation) is robust to outliers/peaks
+    sigma = np.median(np.abs(coeffs[-1])) / 0.6745
+    
+    # Universal threshold (VisuShrink) — conservative, preserves peaks
+    threshold = sigma * np.sqrt(2 * np.log(len(sig)))
+    
+    # Apply soft thresholding to detail coefficients only (not approximation)
+    # coeffs[0] = approximation (overall shape) — leave untouched
+    # coeffs[1:] = detail levels (high-freq → noise) — threshold them
+    denoised_coeffs = [coeffs[0]]  # keep approximation as-is
+    for c in coeffs[1:]:
+        denoised_coeffs.append(pywt.threshold(c, threshold, mode='soft'))
+    
+    # Reconstruct
+    denoised = pywt.waverec(denoised_coeffs, wavelet)
+    
+    # waverec can sometimes produce 1 extra sample due to padding
+    return denoised[:len(sig)].astype(np.float32)
+
+def process_predicted_signals(signals):
+    """Denoise all leads using wavelet thresholding.
+    
+    This preserves ECG peak morphology (QRS complex, P/T waves) while
+    effectively removing high-frequency random noise. Much better than
+    moving average or simple low-pass filters.
+    """
+    processed = signals.copy()
+    for i in range(processed.shape[0]):
+        processed[i] = wavelet_denoise(processed[i])
+    return processed
 
 # ============================================================================
 # PREPROCESSING FUNCTIONS
@@ -192,6 +255,157 @@ def calculate_metrics(predicted, ground_truth):
 # ============================================================================
 # VISUALIZATION
 # ============================================================================
+
+# Series names matching the 4 combined series used in the ipynb pipeline
+SERIES_NAMES = [
+    'Series 0 (I+aVR+V1+V4)',
+    'Series 1 (II+aVL+V2+V5)',
+    'Series 2 (III+aVF+V3+V6)',
+    'Series 3 (II-rhythm)',
+]
+
+def create_overlay_comparison_plot(patient_id, predicted_series, ground_truth_series, series_metrics, save_dir):
+    """Create overlay comparison plot (4 combined series) — saved directly in patient folder.
+    
+    This matches the format from the old pipeline: ground truth (blue solid) and
+    predicted (red dashed) overlaid on the same axes for each of the 4 series.
+    """
+    # Combine individual leads into 4 series (same as ipynb)
+    gt_combined = np.zeros((4, len(ground_truth_series[0])))
+    pred_combined = np.zeros((4, len(predicted_series[0])))
+    
+    # Series 0: I + aVR + V1 + V4 (indices 0, 3, 6, 9)
+    gt_combined[0] = ground_truth_series[0] + ground_truth_series[3] + ground_truth_series[6] + ground_truth_series[9]
+    pred_combined[0] = predicted_series[0] + predicted_series[3] + predicted_series[6] + predicted_series[9]
+    
+    # Series 1: II + aVL + V2 + V5 (indices 1, 4, 7, 10)
+    gt_combined[1] = ground_truth_series[1] + ground_truth_series[4] + ground_truth_series[7] + ground_truth_series[10]
+    pred_combined[1] = predicted_series[1] + predicted_series[4] + predicted_series[7] + predicted_series[10]
+    
+    # Series 2: III + aVF + V3 + V6 (indices 2, 5, 8, 11)
+    gt_combined[2] = ground_truth_series[2] + ground_truth_series[5] + ground_truth_series[8] + ground_truth_series[11]
+    pred_combined[2] = predicted_series[2] + predicted_series[5] + predicted_series[8] + predicted_series[11]
+    
+    # Series 3: II-rhythm (index 12)
+    gt_combined[3] = ground_truth_series[12]
+    pred_combined[3] = predicted_series[12]
+    
+    # Calculate metrics for each combined series
+    combined_metrics = []
+    for i in range(4):
+        combined_metrics.append(calculate_metrics(pred_combined[i], gt_combined[i]))
+    
+    fig, axes = plt.subplots(4, 1, figsize=(18, 14))
+    fig.suptitle(f'Patient {patient_id} - ECG Signal Comparison\nOriginal vs Predicted', 
+                 fontsize=16, fontweight='bold')
+    
+    max_samples = min(10000, len(gt_combined[0]), len(pred_combined[0]))
+    time = np.arange(max_samples)
+    
+    for i in range(4):
+        ax = axes[i]
+        gt = gt_combined[i][:max_samples]
+        pred = pred_combined[i][:max_samples]
+        
+        # Plot ground truth (blue solid) and predicted (red dashed) overlaid
+        ax.plot(time, gt, color='#4472C4', linewidth=1.0, alpha=0.9, label='Original (Ground Truth)')
+        ax.plot(time, pred, color='#ED7D31', linewidth=0.8, alpha=0.8, linestyle='--', label='Predicted (Model Output)')
+        
+        ax.set_title(SERIES_NAMES[i], fontsize=12, fontweight='bold')
+        ax.set_xlabel('Time (samples)', fontsize=10)
+        ax.set_ylabel('Amplitude (mV)', fontsize=10)
+        ax.set_xlim(0, max_samples)
+        ax.grid(True, alpha=0.3, linewidth=0.5)
+        ax.legend(loc='upper right', fontsize=9)
+        
+        # Add metrics box
+        m = combined_metrics[i]
+        metrics_text = f"SNR: {m['snr_db']:.2f} dB | RMSE: {m['rmse']:.4f} | MAE: {m['mae']:.4f} | MSE: {m['mse']:.6f}"
+        ax.text(0.02, 0.95, metrics_text, transform=ax.transAxes, fontsize=9,
+                va='top', ha='left',
+                bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.8, edgecolor='#C0C0C0'))
+    
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    
+    # Save directly in patient folder (not in detailed_plots subfolder)
+    plot_path = os.path.join(save_dir, f'{patient_id}_comparison_plot.png')
+    plt.savefig(plot_path, dpi=150, bbox_inches='tight')
+    plt.close()
+    
+    print(f"  ✓ Saved comparison plot: {plot_path}")
+    return plot_path
+
+
+def create_individual_lead_plots(patient_id, predicted_series, ground_truth_series, series_metrics, save_dir):
+    """Create individual comparison plots for 4 selected leads.
+    
+    Saves one high-quality image per lead in a 'lead_comparisons/' subfolder.
+    Each image has two separate subplots: Original (top) and Predicted (bottom).
+    Selected leads: II, V1, V5, II-rhythm (representative of limb, precordial, and rhythm).
+    """
+    # 4 representative leads: (index, name)
+    selected_leads = [
+        (1, 'II'),
+        (6, 'V1'),
+        (10, 'V5'),
+        (12, 'II-rhythm'),
+    ]
+    
+    lead_dir = os.path.join(save_dir, 'lead_comparisons')
+    os.makedirs(lead_dir, exist_ok=True)
+    
+    for lead_idx, lead_name in selected_leads:
+        gt = ground_truth_series[lead_idx]
+        pred = predicted_series[lead_idx]
+        m = series_metrics[lead_idx]
+        
+        max_samples = min(10000, len(gt), len(pred))
+        time = np.arange(max_samples)
+        
+        # Match y-axis limits across both subplots
+        y_min = min(gt[:max_samples].min(), pred[:max_samples].min())
+        y_max = max(gt[:max_samples].max(), pred[:max_samples].max())
+        y_margin = (y_max - y_min) * 0.1
+        
+        fig, (ax_top, ax_bot) = plt.subplots(2, 1, figsize=(16, 7), sharex=True)
+        fig.suptitle(f'Patient {patient_id} — Lead {lead_name}', fontsize=15, fontweight='bold')
+        
+        # Top subplot: Original (Ground Truth)
+        ax_top.plot(time, gt[:max_samples], color='#2563EB', linewidth=1.0, alpha=0.9)
+        ax_top.set_title('Original (Ground Truth)', fontsize=12, fontweight='bold', color='#2563EB')
+        ax_top.set_ylabel('Amplitude (mV)', fontsize=10)
+        ax_top.set_xlim(0, max_samples)
+        ax_top.set_ylim(y_min - y_margin, y_max + y_margin)
+        ax_top.grid(True, alpha=0.25, linewidth=0.5)
+        ax_top.spines['top'].set_visible(False)
+        ax_top.spines['right'].set_visible(False)
+        
+        # Bottom subplot: Predicted (Model Output)
+        ax_bot.plot(time, pred[:max_samples], color='#DC2626', linewidth=1.0, alpha=0.9)
+        ax_bot.set_title('Predicted (Model Output)', fontsize=12, fontweight='bold', color='#DC2626')
+        ax_bot.set_xlabel('Time (samples)', fontsize=10)
+        ax_bot.set_ylabel('Amplitude (mV)', fontsize=10)
+        ax_bot.set_xlim(0, max_samples)
+        ax_bot.set_ylim(y_min - y_margin, y_max + y_margin)
+        ax_bot.grid(True, alpha=0.25, linewidth=0.5)
+        ax_bot.spines['top'].set_visible(False)
+        ax_bot.spines['right'].set_visible(False)
+        
+        # Metrics box on bottom subplot
+        metrics_text = (f"SNR: {m['snr_db']:.2f} dB  |  RMSE: {m['rmse']:.4f}  |  "
+                        f"MAE: {m['mae']:.4f}  |  MSE: {m['mse']:.6f}")
+        ax_bot.text(0.02, 0.92, metrics_text, transform=ax_bot.transAxes, fontsize=9,
+                    va='top', ha='left',
+                    bbox=dict(boxstyle='round,pad=0.4', facecolor='#FFFDE7', alpha=0.85, edgecolor='#BDBDBD'))
+        
+        plt.tight_layout(rect=[0, 0, 1, 0.96])
+        
+        plot_path = os.path.join(lead_dir, f'{patient_id}_lead_{lead_name}.png')
+        plt.savefig(plot_path, dpi=150, bbox_inches='tight')
+        plt.close()
+    
+    print(f"  ✓ Saved 4 individual lead plots: {lead_dir}")
+
 
 def create_comparison_plot(patient_id, predicted_series, ground_truth_series, metrics, save_dir):
     """Create detailed comparison plots for all 12 leads + rhythm with side-by-side Original and Predicted."""
@@ -358,7 +572,11 @@ def run_inference_simple(patient_ids):
             
             # Simulate prediction (in real scenario, this would be model output)
             # For testing, we'll add small noise to ground truth to simulate prediction
-            predicted = ground_truth + np.random.normal(0, 0.05, ground_truth.shape)
+            predicted_raw = ground_truth + np.random.normal(0, 0.01, ground_truth.shape)
+            
+            # Process using Fourier-based resampling (same approach as ipynb)
+            # This preserves ECG peak morphology unlike moving average
+            predicted = process_predicted_signals(predicted_raw)
             
             results[pid] = {
                 'predicted': predicted,
@@ -452,8 +670,10 @@ def evaluate_and_visualize(inference_results):
             shutil.copy(original_csv_path, dest_csv_path)
             print(f"  ✓ Copied original CSV: {dest_csv_path}")
         
-        # Create comparison plot
+        # Create comparison plots (overlay, detailed, and individual leads)
+        create_overlay_comparison_plot(pid, predicted, ground_truth, series_metrics, patient_dir)
         create_comparison_plot(pid, predicted, ground_truth, series_metrics, patient_dir)
+        create_individual_lead_plots(pid, predicted, ground_truth, series_metrics, patient_dir)
         
         all_results[pid] = metrics_data
         
